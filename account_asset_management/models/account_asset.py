@@ -3,7 +3,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 import calendar
-from datetime import datetime
+from datetime import date
 from dateutil.relativedelta import relativedelta
 import logging
 from sys import exc_info
@@ -37,7 +37,7 @@ class AccountAsset(models.Model):
         compute='_compute_move_line_check',
         string='Has accounting entries')
     name = fields.Char(
-        string='Asset Name', size=64, required=True,
+        string='Asset Name', required=True,
         readonly=True, states={'draft': [('readonly', False)]})
     code = fields.Char(
         string='Reference', size=32, readonly=True,
@@ -146,7 +146,7 @@ class AccountAsset(models.Model):
         states={'draft': [('readonly', False)]})
     method_progress_factor = fields.Float(
         string='Degressive Factor', readonly=True,
-        states={'draft': [('readonly', False)]}, default=0.3)
+        states={'draft': [('readonly', False)]}, default=0.3, digits=(16, 4))
     method_time = fields.Selection(
         selection=lambda self: self.env[
             'account.asset.profile']._selection_method_time(),
@@ -410,6 +410,10 @@ class AccountAsset(models.Model):
                 asset.state = 'close'
             else:
                 asset.state = 'open'
+                if not asset.depreciation_line_ids.filtered(
+                    lambda l: l.type != 'create'
+                ):
+                    asset.compute_depreciation_board()
         return True
 
     @api.multi
@@ -443,9 +447,9 @@ class AccountAsset(models.Model):
     @api.multi
     def open_entries(self):
         self.ensure_one()
-        amls = self.env['account.move.line'].search(
-            [('asset_id', '=', self.id)], order='date ASC')
-        am_ids = [l.move_id.id for l in amls]
+        # needed for avoiding errors after grouping in assets
+        context = dict(self.env.context)
+        context.pop('group_by', None)
         return {
             'name': _("Journal Entries"),
             'view_type': 'form',
@@ -453,8 +457,9 @@ class AccountAsset(models.Model):
             'res_model': 'account.move',
             'view_id': False,
             'type': 'ir.actions.act_window',
-            'context': self.env.context,
-            'domain': [('id', 'in', am_ids)],
+            'context': context,
+            'domain': [
+                ('id', 'in', self.account_move_line_ids.mapped('move_id').ids)]
         }
 
     @api.multi
@@ -626,11 +631,11 @@ class AccountAsset(models.Model):
                         duration = (fy_date_stop - fy_date_start).days + 1
                     else:
                         duration = (
-                            datetime(year, 12, 31) - fy_date_start).days + 1
+                            date(year, 12, 31) - fy_date_start).days + 1
                     factor = float(duration) / cy_days
                 elif i == cnt - 1:  # last year
                     duration = (
-                        fy_date_stop - datetime(year, 1, 1)).days + 1
+                        fy_date_stop - date(year, 1, 1)).days + 1
                     factor += float(duration) / cy_days
                 else:
                     factor += 1.0
@@ -1035,8 +1040,10 @@ class AccountAsset(models.Model):
             except Exception:
                 e = exc_info()[0]
                 tb = ''.join(format_exception(*exc_info()))
-                asset_ref = depreciation.asset_id.code and '%s (ref: %s)' \
-                    % (asset.name, asset.code) or asset.name
+                asset_ref = depreciation.asset_id.name
+                if depreciation.asset_id.code:
+                    asset_ref = '[%s] %s' % (
+                        depreciation.asset_id.code, asset_ref)
                 error_log += _(
                     "\nError while processing asset '%s': %s"
                 ) % (asset_ref, str(e))

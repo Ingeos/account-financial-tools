@@ -63,7 +63,7 @@ class AccountMoveLine(models.Model):
         self.asset_profile_id = self.account_id.asset_profile_id
 
     @api.model
-    def create(self, vals):
+    def _add_asset_to_aml_vals(self, vals):
         if vals.get('asset_id') and not self.env.context.get('allow_asset'):
             raise UserError(
                 _("You are not allowed to link "
@@ -91,7 +91,13 @@ class AccountMoveLine(models.Model):
                 create_asset_from_move_line=True,
                 move_id=vals['move_id']).create(asset_vals)
             vals['asset_id'] = asset.id
-        return super().create(vals)
+        return vals
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            self._add_asset_to_aml_vals(vals)
+        return super().create(vals_list)
 
     @api.multi
     def _prepare_asset_create(self, vals):
@@ -135,10 +141,6 @@ class AccountMoveLine(models.Model):
                   "an accounting entry to an asset."
                   "\nYou should generate such entries from the asset."))
         if vals.get('asset_profile_id'):
-            if len(self) == 1:
-                raise AssertionError(_(
-                    'This option should only be used for a single id at a '
-                    'time.'))
             asset_obj = self.env['account.asset']
             for aml in self:
                 if vals['asset_profile_id'] == aml.asset_profile_id.id:
@@ -151,6 +153,8 @@ class AccountMoveLine(models.Model):
                     create_asset_from_move_line=True,
                     move_id=aml.move_id.id).create(asset_vals)
                 vals['asset_id'] = asset.id
+                super(AccountMoveLine, aml).write(vals)
+            return True
         return super().write(vals)
 
     @api.model
