@@ -8,8 +8,10 @@ setuptools.setup(
     description="Meta package for oca-account-financial-tools Odoo addons",
     version=version,
     install_requires=[
+        'odoo12-addon-account_asset_batch_compute',
         'odoo12-addon-account_asset_management',
         'odoo12-addon-account_balance_line',
+        'odoo12-addon-account_bank_statement_chatter',
         'odoo12-addon-account_cash_basis_group_base_line',
         'odoo12-addon-account_chart_update',
         'odoo12-addon-account_check_deposit',
@@ -39,6 +41,7 @@ setuptools.setup(
         'odoo12-addon-account_netting',
         'odoo12-addon-account_partner_required',
         'odoo12-addon-account_payment_netting',
+        'odoo12-addon-account_permanent_lock_move',
         'odoo12-addon-account_renumber',
         'odoo12-addon-account_spread_cost_revenue',
         'odoo12-addon-account_tag_menu',
