@@ -15,9 +15,6 @@ class AccountAssetProfile(models.Model):
     account_analytic_id = fields.Many2one(
         comodel_name='account.analytic.account',
         string='Analytic account')
-    analytic_tag_ids = fields.Many2many(
-        comodel_name='account.analytic.tag',
-        string='Analytic tags')
     account_asset_id = fields.Many2one(
         comodel_name='account.account',
         domain="[('company_id', '=', company_id), "
@@ -99,10 +96,7 @@ class AccountAssetProfile(models.Model):
         help="Choose the method to use to compute the dates and "
              "number of depreciation lines.\n"
              "  * Number of Years: Specify the number of years "
-             "for the depreciation.\n"
-             "  * Number of Depreciations: Fix the number of "
-             "depreciation lines and the time between 2 depreciations.\n"
-    )
+             "for the depreciation.\n")
     days_calc = fields.Boolean(
         string='Calculate by days',
         default=False,
@@ -167,7 +161,6 @@ class AccountAssetProfile(models.Model):
         """
         return [
             ('year', _('Number of Years or end date')),
-            ('number', _('Number of Depreciations')),
         ]
 
     @api.multi

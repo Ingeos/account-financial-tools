@@ -28,7 +28,7 @@ def create_asset_groups(cr):
         LEFT JOIN account_asset_group aag2
             ON aag2.{origin_column} = va.{parent_column}
         WHERE {parent_column} {rest_sql}
-        RETURNING {origin_column}
+        RETURNING id
     """)
     isnull = sql.SQL("IS NULL")
     inids = sql.SQL("IN %(ids)s")
