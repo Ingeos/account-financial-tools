@@ -14,6 +14,8 @@ setuptools.setup(
         'odoo14-addon-account_check_deposit',
         'odoo14-addon-account_fiscal_position_vat_check',
         'odoo14-addon-account_fiscal_year',
+        'odoo14-addon-account_invoice_constraint_chronology',
+        'odoo14-addon-account_journal_lock_date',
         'odoo14-addon-account_lock_date_update',
         'odoo14-addon-account_menu',
         'odoo14-addon-account_move_force_removal',
@@ -21,6 +23,8 @@ setuptools.setup(
         'odoo14-addon-account_move_line_tax_editable',
         'odoo14-addon-account_move_template',
         'odoo14-addon-account_no_default',
+        'odoo14-addon-account_template_active',
+        'odoo14-addon-base_vat_optional_vies',
         'odoo14-addon-product_category_tax',
     ],
     classifiers=[
