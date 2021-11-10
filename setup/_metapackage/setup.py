@@ -12,6 +12,7 @@ setuptools.setup(
         'odoo14-addon-account_balance_line',
         'odoo14-addon-account_chart_update',
         'odoo14-addon-account_check_deposit',
+        'odoo14-addon-account_fiscal_month',
         'odoo14-addon-account_fiscal_position_vat_check',
         'odoo14-addon-account_fiscal_year',
         'odoo14-addon-account_invoice_constraint_chronology',
@@ -20,15 +21,19 @@ setuptools.setup(
         'odoo14-addon-account_menu',
         'odoo14-addon-account_move_force_removal',
         'odoo14-addon-account_move_line_menu',
+        'odoo14-addon-account_move_line_purchase_info',
         'odoo14-addon-account_move_line_tax_editable',
         'odoo14-addon-account_move_template',
+        'odoo14-addon-account_netting',
         'odoo14-addon-account_no_default',
         'odoo14-addon-account_template_active',
         'odoo14-addon-base_vat_optional_vies',
         'odoo14-addon-product_category_tax',
+        'odoo14-addon-stock_account_prepare_anglo_saxon_out_lines_hook',
     ],
     classifiers=[
         'Programming Language :: Python',
         'Framework :: Odoo',
+        'Framework :: Odoo :: 14.0',
     ]
 )

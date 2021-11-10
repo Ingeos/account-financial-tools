@@ -36,7 +36,7 @@ class AccountMove(models.Model):
         for rec in self:
             assets = (
                 self.env["account.asset.line"]
-                .search([("move_id", "=", self.id)])
+                .search([("move_id", "=", rec.id)])
                 .mapped("asset_id")
             )
             rec.asset_count = len(assets)
@@ -73,7 +73,7 @@ class AccountMove(models.Model):
         return super().write(vals)
 
     def _prepare_asset_vals(self, aml):
-        depreciation_base = aml.price_subtotal
+        depreciation_base = aml.balance
         return {
             "name": aml.name,
             "code": self.name,
