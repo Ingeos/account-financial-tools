@@ -28,11 +28,12 @@ addon | version | maintainers | summary
 [account_fiscal_year](account_fiscal_year/) | 14.0.1.1.1 | [![eLBati](https://github.com/eLBati.png?size=30px)](https://github.com/eLBati) | Create Account Fiscal Year
 [account_invoice_constraint_chronology](account_invoice_constraint_chronology/) | 14.0.1.0.0 |  | Account Invoice Constraint Chronology
 [account_journal_lock_date](account_journal_lock_date/) | 14.0.1.0.0 |  | Lock each journal independently
-[account_lock_date_update](account_lock_date_update/) | 14.0.1.0.0 |  | Allow an Account adviser to update locking date without having access to all technical settings
+[account_lock_date_update](account_lock_date_update/) | 14.0.2.0.0 |  | Allow an Account adviser to update locking date without having access to all technical settings
 [account_menu](account_menu/) | 14.0.1.1.0 | [![legalsylvain](https://github.com/legalsylvain.png?size=30px)](https://github.com/legalsylvain) | Adds missing menu entries for Account module
 [account_move_force_removal](account_move_force_removal/) | 14.0.1.0.0 |  | Allow force removal account moves
 [account_move_line_menu](account_move_line_menu/) | 14.0.1.0.0 |  | Adds a Journal Items menu
 [account_move_line_purchase_info](account_move_line_purchase_info/) | 14.0.1.0.1 |  | Introduces the purchase order line to the journal items
+[account_move_line_sale_info](account_move_line_sale_info/) | 14.0.1.0.0 |  | Introduces the purchase order line to the journal items
 [account_move_line_tax_editable](account_move_line_tax_editable/) | 14.0.1.1.0 |  | Allows to edit taxes on non-posted account move lines
 [account_move_template](account_move_template/) | 14.0.1.1.0 |  | Templates for recurring Journal Entries
 [account_netting](account_netting/) | 14.0.1.0.0 |  | Compensate AR/AP accounts from the same partner
