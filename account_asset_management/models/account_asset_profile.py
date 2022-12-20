@@ -15,43 +15,33 @@ class AccountAssetProfile(models.Model):
     account_analytic_id = fields.Many2one(
         comodel_name='account.analytic.account',
         string='Analytic account')
-    analytic_tag_ids = fields.Many2many(
-        comodel_name='account.analytic.tag',
-        string='Analytic tags')
     account_asset_id = fields.Many2one(
         comodel_name='account.account',
-        domain="[('company_id', '=', company_id), "
-               "('deprecated', '=', False)]",
+        domain=[('deprecated', '=', False)],
         string='Asset Account', required=True)
     account_depreciation_id = fields.Many2one(
         comodel_name='account.account',
-        domain="[('company_id', '=', company_id), "
-               "('deprecated', '=', False)]",
+        domain=[('deprecated', '=', False)],
         string='Depreciation Account', required=True)
     account_expense_depreciation_id = fields.Many2one(
         comodel_name='account.account',
-        domain="[('company_id', '=', company_id), "
-               "('deprecated', '=', False)]",
+        domain=[('deprecated', '=', False)],
         string='Depr. Expense Account', required=True)
     account_plus_value_id = fields.Many2one(
         comodel_name='account.account',
-        domain="[('company_id', '=', company_id), "
-               "('deprecated', '=', False)]",
+        domain=[('deprecated', '=', False)],
         string='Plus-Value Account')
     account_min_value_id = fields.Many2one(
         comodel_name='account.account',
-        domain="[('company_id', '=', company_id), "
-               "('deprecated', '=', False)]",
+        domain=[('deprecated', '=', False)],
         string='Min-Value Account')
     account_residual_value_id = fields.Many2one(
         comodel_name='account.account',
-        domain="[('company_id', '=', company_id), "
-               "('deprecated', '=', False)]",
+        domain=[('deprecated', '=', False)],
         string='Residual Value Account')
     journal_id = fields.Many2one(
         comodel_name='account.journal',
-        domain="[('company_id', '=', company_id), "
-               "('type', '=', 'general')]",
+        domain=[('type', '=', 'general')],
         string='Journal', required=True)
     company_id = fields.Many2one(
         comodel_name='res.company',
@@ -91,7 +81,7 @@ class AccountAssetProfile(models.Model):
         default='year',
         help="Period length for the depreciation accounting entries")
     method_progress_factor = fields.Float(
-        string='Degressive Factor', default=0.3, digits=(16, 4))
+        string='Degressive Factor', default=0.3)
     method_time = fields.Selection(
         selection=lambda self: self._selection_method_time(),
         string='Time Method', required=True,
@@ -99,10 +89,7 @@ class AccountAssetProfile(models.Model):
         help="Choose the method to use to compute the dates and "
              "number of depreciation lines.\n"
              "  * Number of Years: Specify the number of years "
-             "for the depreciation.\n"
-             "  * Number of Depreciations: Fix the number of "
-             "depreciation lines and the time between 2 depreciations.\n"
-    )
+             "for the depreciation.\n")
     days_calc = fields.Boolean(
         string='Calculate by days',
         default=False,
@@ -167,7 +154,6 @@ class AccountAssetProfile(models.Model):
         """
         return [
             ('year', _('Number of Years or end date')),
-            ('number', _('Number of Depreciations')),
         ]
 
     @api.multi

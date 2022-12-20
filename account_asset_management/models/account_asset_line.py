@@ -125,7 +125,7 @@ class AccountAssetLine(models.Model):
             elif list(vals.keys()) == ['asset_id']:
                 continue
             elif dl.move_id and not self.env.context.get(
-                    'allow_asset_line_update') and dl.type != 'create':
+                    'allow_asset_line_update'):
                 raise UserError(_(
                     "You cannot change a depreciation line "
                     "with an associated accounting entry."))
@@ -189,11 +189,9 @@ class AccountAssetLine(models.Model):
         return move_data
 
     def _setup_move_line_data(self, depreciation_date, account, ml_type, move):
-        """Prepare data to be propagated to account.move.line"""
         asset = self.asset_id
         amount = self.amount
         analytic_id = False
-        analytic_tags = self.env["account.analytic.tag"]
         if ml_type == 'depreciation':
             debit = amount < 0 and -amount or 0.0
             credit = amount > 0 and amount or 0.0
@@ -201,7 +199,6 @@ class AccountAssetLine(models.Model):
             debit = amount > 0 and amount or 0.0
             credit = amount < 0 and -amount or 0.0
             analytic_id = asset.account_analytic_id.id
-            analytic_tags = asset.analytic_tag_ids
         move_line_data = {
             'name': asset.name,
             'ref': self.name,
@@ -212,7 +209,6 @@ class AccountAssetLine(models.Model):
             'journal_id': asset.profile_id.journal_id.id,
             'partner_id': asset.partner_id.id,
             'analytic_account_id': analytic_id,
-            'analytic_tag_ids': [(4, tag.id) for tag in analytic_tags],
             'date': depreciation_date,
             'asset_id': asset.id,
         }

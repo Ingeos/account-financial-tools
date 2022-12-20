@@ -80,10 +80,10 @@ class TestAccountMoveLinePurchaseInfo(common.TransactionCase):
                 })
         return user.id
 
-    def _create_account_type(self, name, account_type):
+    def _create_account_type(self, name, type):
         acc_type = self.acc_type_model.create({
             'name': name,
-            'type': account_type
+            'type': type
         })
         return acc_type
 

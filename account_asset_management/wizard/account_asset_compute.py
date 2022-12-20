@@ -16,14 +16,9 @@ class AccountAssetCompute(models.TransientModel):
     note = fields.Text()
 
     @api.multi
-    def _get_asset_to_compute(self):
-        self.ensure_one()
-        return self.env['account.asset'].search(
-            [('state', '=', 'open')])
-
-    @api.multi
     def asset_compute(self):
-        assets = self._get_asset_to_compute()
+        assets = self.env['account.asset'].search(
+            [('state', '=', 'open')])
         created_move_ids, error_log = assets._compute_entries(
             self.date_end, check_triggers=True)
 
@@ -31,7 +26,7 @@ class AccountAssetCompute(models.TransientModel):
             module = __name__.split('addons.')[1].split('.')[0]
             result_view = self.env.ref(
                 '%s.%s_view_form_result'
-                % (module, self._table))
+                % (module, self._name))
             self.note = _("Compute Assets errors") + ':\n' + error_log
             return {
                 'name': _('Compute Assets result'),

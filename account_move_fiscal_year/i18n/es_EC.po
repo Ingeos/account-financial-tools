@@ -33,6 +33,7 @@ msgstr ""
 #. module: account_move_fiscal_year
 #: model:ir.model,name:account_move_fiscal_year.model_account_move
 #, fuzzy
+#| msgid "Journal Item"
 msgid "Journal Entries"
 msgstr "Detalle Contable"
 

@@ -4,7 +4,7 @@
 {
     'name': 'Account Document Reversal',
     'summary': 'Create reversed journal entries when cancel document',
-    'version': '12.0.1.0.1',
+    'version': '12.0.1.0.0',
     'author': 'Ecosoft,'
               'Eficent,'
               'Odoo Community Association (OCA)',
@@ -18,6 +18,6 @@
     'license': 'AGPL-3',
     'installable': True,
     'application': False,
-    'development_status': 'Beta',
+    'development_status': 'beta',
     'maintainers': ['kittiu'],
 }

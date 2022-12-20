@@ -35,15 +35,18 @@ Display the fiscal year on journal entries/items.
 Installation
 ============
 
+
 You need to install account_fiscal_year.
 
 Configuration
 =============
 
+
 You just need to create date ranges associated to 'Fiscal Year' type.
 
 Usage
 =====
+
 
 Go to Invoicing -> Configuration -> Date Ranges -> Fiscal Years to create a new
 Fiscal Year.
@@ -68,6 +71,7 @@ Authors
 
 Contributors
 ~~~~~~~~~~~~
+
 
 * Benjamin Willig <benjamin.willig@acsone.eu>
 

@@ -28,7 +28,7 @@ def create_asset_groups(cr):
         LEFT JOIN account_asset_group aag2
             ON aag2.{origin_column} = va.{parent_column}
         WHERE {parent_column} {rest_sql}
-        RETURNING {origin_column}
+        RETURNING id
     """)
     isnull = sql.SQL("IS NULL")
     inids = sql.SQL("IN %(ids)s")
@@ -78,7 +78,7 @@ def update_asset_group_links(cr):
 @openupgrade.migrate()
 def migrate(env, version):
     column = openupgrade.get_legacy_name('parent_id')
-    if openupgrade.column_exists(env.cr, 'account_asset_profile', column):
+    if openupgrade.column_exists(env.cr, 'account_asset', column):
         # if migrating directly from v11 `account_asset` module, there are no
         # view assets nor parents
         create_asset_groups(env.cr)

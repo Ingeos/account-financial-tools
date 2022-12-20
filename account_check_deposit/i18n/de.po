@@ -10,15 +10,15 @@ msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-01-25 11:46+0000\n"
-"PO-Revision-Date: 2021-07-05 16:48+0000\n"
-"Last-Translator: Maria Sparenberg <maria.sparenberg@gmx.net>\n"
+"PO-Revision-Date: 2018-10-11 10:56+0000\n"
+"Last-Translator: Rudolf Schnapka <rs@techno-flex.de>\n"
 "Language-Team: German (https://www.transifex.com/oca/teams/23907/de/)\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.3.2\n"
+"X-Generator: Weblate 3.1.1\n"
 
 #. module: account_check_deposit
 #: model_terms:ir.ui.view,arch_db:account_check_deposit.report_checkdeposit
@@ -143,8 +143,9 @@ msgstr "Unternehmen"
 
 #. module: account_check_deposit
 #: model:ir.model,name:account_check_deposit.model_res_config_settings
+#, fuzzy
 msgid "Config Settings"
-msgstr "Konfigurationseinstellungen"
+msgstr "account.config.settings"
 
 #. module: account_check_deposit
 #: model:ir.model.fields,field_description:account_check_deposit.field_account_check_deposit__create_uid
@@ -229,12 +230,12 @@ msgstr "Journal"
 #. module: account_check_deposit
 #: model:ir.model.fields,field_description:account_check_deposit.field_account_check_deposit__move_id
 msgid "Journal Entry"
-msgstr "Journal-Buchung"
+msgstr "Journalbuchung"
 
 #. module: account_check_deposit
 #: model:ir.model,name:account_check_deposit.model_account_move_line
 msgid "Journal Item"
-msgstr "Journalbuchung"
+msgstr "Journalposten"
 
 #. module: account_check_deposit
 #: model:ir.model.fields,field_description:account_check_deposit.field_account_check_deposit____last_update
@@ -264,6 +265,7 @@ msgstr "Scheckliste:"
 #. module: account_check_deposit
 #: code:addons/account_check_deposit/models/account_deposit.py:196
 #, fuzzy, python-format
+#| msgid "Missing 'Account for Check Deposits' on the company '%s'."
 msgid "Missing 'Check Deposit Offsetting Account' on the company '%s'."
 msgstr "'Konto zu Scheckeinzahlungen' fehlt im Unternehmen '%s'."
 
@@ -276,7 +278,7 @@ msgstr "'Vorgabe-Soll-Konto' fehlt im Bank-Journal '%s'"
 #. module: account_check_deposit
 #: model:ir.model.fields,field_description:account_check_deposit.field_account_check_deposit__name
 msgid "Name"
-msgstr "Bezeichnung"
+msgstr "Name"
 
 #. module: account_check_deposit
 #: model:ir.model.fields,field_description:account_check_deposit.field_account_check_deposit__check_count
@@ -287,13 +289,14 @@ msgstr "Anzahl Schecks"
 #: model:ir.model.fields,field_description:account_check_deposit.field_res_company__check_deposit_post_move
 #: model:ir.model.fields,field_description:account_check_deposit.field_res_config_settings__check_deposit_post_move
 #, fuzzy
+#| msgid "Transfer Account for Check Deposits"
 msgid "Post Move for Check Deposits"
 msgstr "Transferkonto bei Scheckeinreichern"
 
 #. module: account_check_deposit
 #: model_terms:ir.ui.view,arch_db:account_check_deposit.account_check_deposit_view_form
 msgid "Print"
-msgstr "Drucken"
+msgstr ""
 
 #. module: account_check_deposit
 #: model:ir.model.fields,field_description:account_check_deposit.field_account_check_deposit__is_reconcile

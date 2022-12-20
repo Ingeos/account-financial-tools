@@ -3,7 +3,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 import calendar
-from datetime import date
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import logging
 from sys import exc_info
@@ -37,7 +37,7 @@ class AccountAsset(models.Model):
         compute='_compute_move_line_check',
         string='Has accounting entries')
     name = fields.Char(
-        string='Asset Name', required=True,
+        string='Asset Name', size=64, required=True,
         readonly=True, states={'draft': [('readonly', False)]})
     code = fields.Char(
         string='Reference', size=32, readonly=True,
@@ -146,7 +146,7 @@ class AccountAsset(models.Model):
         states={'draft': [('readonly', False)]})
     method_progress_factor = fields.Float(
         string='Degressive Factor', readonly=True,
-        states={'draft': [('readonly', False)]}, default=0.3, digits=(16, 4))
+        states={'draft': [('readonly', False)]}, default=0.3)
     method_time = fields.Selection(
         selection=lambda self: self.env[
             'account.asset.profile']._selection_method_time(),
@@ -157,8 +157,10 @@ class AccountAsset(models.Model):
              "number of depreciation lines.\n"
              "  * Number of Years: Specify the number of years "
              "for the depreciation.\n"
-             "  * Number of Depreciations: Fix the number of "
-             "depreciation lines and the time between 2 depreciations.\n"
+             # "  * Number of Depreciations: Fix the number of "
+             # "depreciation lines and the time between 2 depreciations.\n"
+             # "  * Ending Date: Choose the time between 2 depreciations "
+             # "and the date the depreciations won't go beyond."
     )
     days_calc = fields.Boolean(
         string='Calculate by days',
@@ -200,9 +202,6 @@ class AccountAsset(models.Model):
     account_analytic_id = fields.Many2one(
         comodel_name='account.analytic.account',
         string='Analytic account')
-    analytic_tag_ids = fields.Many2many(
-        comodel_name='account.analytic.tag',
-        string='Analytic tags')
 
     @api.model
     def _default_company_id(self):
@@ -256,10 +255,10 @@ class AccountAsset(models.Model):
                       "Year."))
 
     @api.multi
-    @api.constrains('date_start', 'method_end', 'method_number', 'method_time')
+    @api.constrains('date_start', 'method_end', 'method_time')
     def _check_dates(self):
         for asset in self:
-            if asset.method_time == 'year' and not asset.method_number:
+            if asset.method_time == 'end':
                 if asset.method_end <= asset.date_start:
                     raise UserError(
                         _("The Start Date must precede the Ending Date."))
@@ -299,7 +298,6 @@ class AccountAsset(models.Model):
                 'method_progress_factor': profile.method_progress_factor,
                 'prorata': profile.prorata,
                 'account_analytic_id': profile.account_analytic_id,
-                'analytic_tag_ids': profile.analytic_tag_ids,
                 'group_ids': profile.group_ids,
             })
 
@@ -412,10 +410,6 @@ class AccountAsset(models.Model):
                 asset.state = 'close'
             else:
                 asset.state = 'open'
-                if not asset.depreciation_line_ids.filtered(
-                    lambda l: l.type != 'create'
-                ):
-                    asset.compute_depreciation_board()
         return True
 
     @api.multi
@@ -449,9 +443,9 @@ class AccountAsset(models.Model):
     @api.multi
     def open_entries(self):
         self.ensure_one()
-        # needed for avoiding errors after grouping in assets
-        context = dict(self.env.context)
-        context.pop('group_by', None)
+        amls = self.env['account.move.line'].search(
+            [('asset_id', '=', self.id)], order='date ASC')
+        am_ids = [l.move_id.id for l in amls]
         return {
             'name': _("Journal Entries"),
             'view_type': 'form',
@@ -459,9 +453,8 @@ class AccountAsset(models.Model):
             'res_model': 'account.move',
             'view_id': False,
             'type': 'ir.actions.act_window',
-            'context': context,
-            'domain': [
-                ('id', 'in', self.account_move_line_ids.mapped('move_id').ids)]
+            'context': self.env.context,
+            'domain': [('id', 'in', am_ids)],
         }
 
     @api.multi
@@ -473,10 +466,6 @@ class AccountAsset(models.Model):
 
         line_obj = self.env['account.asset.line']
         digits = self.env['decimal.precision'].precision_get('Account')
-        company = self.company_id
-        fiscalyear_lock_date = (
-            company.fiscalyear_lock_date or fields.Date.to_date('1901-01-01')
-        )
 
         for asset in self:
             if asset.value_residual == 0.0:
@@ -599,7 +588,7 @@ class AccountAsset(models.Model):
                             'name': name,
                             'line_date': line['date'],
                             'line_days': line['days'],
-                            'init_entry': fiscalyear_lock_date >= line['date'],
+                            'init_entry': entry['init'],
                         }
                         depreciated_value += round(amount, digits)
                         depr_line = line_obj.create(vals)
@@ -637,11 +626,11 @@ class AccountAsset(models.Model):
                         duration = (fy_date_stop - fy_date_start).days + 1
                     else:
                         duration = (
-                            date(year, 12, 31) - fy_date_start).days + 1
+                            datetime(year, 12, 31) - fy_date_start).days + 1
                     factor = float(duration) / cy_days
                 elif i == cnt - 1:  # last year
                     duration = (
-                        fy_date_stop - date(year, 1, 1)).days + 1
+                        fy_date_stop - datetime(year, 1, 1)).days + 1
                     factor += float(duration) / cy_days
                 else:
                     factor += 1.0
@@ -877,10 +866,6 @@ class AccountAsset(models.Model):
         i_max = len(table) - 1
         remaining_value = self.depreciation_base
         depreciated_value = 0.0
-        company = self.company_id
-        fiscalyear_lock_date = (
-            company.fiscalyear_lock_date or fields.Date.to_date('1901-01-01')
-        )
 
         for i, entry in enumerate(table):
 
@@ -933,7 +918,6 @@ class AccountAsset(models.Model):
                     'amount': amount,
                     'depreciated_value': depreciated_value,
                     'remaining_value': remaining_value,
-                    'init': fiscalyear_lock_date >= line_date,
                 }
                 lines.append(line)
                 depreciated_value += amount
@@ -983,7 +967,10 @@ class AccountAsset(models.Model):
         if self.method_time in ['year', 'number'] \
                 and not self.method_number and not self.method_end:
             return table
+        company = self.company_id
         asset_date_start = self.date_start
+        fiscalyear_lock_date = (
+            company.fiscalyear_lock_date or fields.Date.to_date('1901-01-01'))
         depreciation_start_date = self._get_depreciation_start_date(
             self._get_fy_info(asset_date_start)['record'])
         depreciation_stop_date = self._get_depreciation_stop_date(
@@ -995,6 +982,7 @@ class AccountAsset(models.Model):
                 'fy': fy_info['record'],
                 'date_start': fy_info['date_from'],
                 'date_stop': fy_info['date_to'],
+                'init': fiscalyear_lock_date >= fy_info['date_from'],
             })
             fy_date_start = fy_info['date_to'] + relativedelta(days=1)
         # Step 1:
@@ -1047,10 +1035,8 @@ class AccountAsset(models.Model):
             except Exception:
                 e = exc_info()[0]
                 tb = ''.join(format_exception(*exc_info()))
-                asset_ref = depreciation.asset_id.name
-                if depreciation.asset_id.code:
-                    asset_ref = '[%s] %s' % (
-                        depreciation.asset_id.code, asset_ref)
+                asset_ref = depreciation.asset_id.code and '%s (ref: %s)' \
+                    % (asset.name, asset.code) or asset.name
                 error_log += _(
                     "\nError while processing asset '%s': %s"
                 ) % (asset_ref, str(e))
@@ -1071,68 +1057,3 @@ class AccountAsset(models.Model):
                 triggers.sudo().write(recompute_vals)
 
         return (result, error_log)
-
-    @api.model
-    def _xls_acquisition_fields(self):
-        """
-        Update list in custom module to add/drop columns or change order
-        """
-        return [
-            'account', 'name', 'code', 'date_start', 'depreciation_base',
-            'salvage_value',
-        ]
-
-    @api.model
-    def _xls_active_fields(self):
-        """
-        Update list in custom module to add/drop columns or change order
-        """
-        return [
-            'account', 'name', 'code', 'date_start',
-            'depreciation_base', 'salvage_value',
-            'period_start_value', 'period_depr', 'period_end_value',
-            'period_end_depr',
-            'method', 'method_number', 'prorata', 'state',
-        ]
-
-    @api.model
-    def _xls_removal_fields(self):
-        """
-        Update list in custom module to add/drop columns or change order
-        """
-        return [
-            'account', 'name', 'code', 'date_remove', 'depreciation_base',
-            'salvage_value',
-        ]
-
-    @api.model
-    def _xls_asset_template(self):
-        """
-        Template updates
-
-        """
-        return {}
-
-    @api.model
-    def _xls_acquisition_template(self):
-        """
-        Template updates
-
-        """
-        return {}
-
-    @api.model
-    def _xls_active_template(self):
-        """
-        Template updates
-
-        """
-        return {}
-
-    @api.model
-    def _xls_removal_template(self):
-        """
-        Template updates
-
-        """
-        return {}
