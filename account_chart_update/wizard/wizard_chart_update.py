@@ -511,7 +511,7 @@ class WizardUpdateChartsAccounts(models.TransientModel):
     def find_accounts_by_templates(self, templates):
         account_ids = []
         for account in templates:
-            account_ids.append(self.find_account_by_templates(account))
+            account_ids.append(self.find_tax_by_templates(account))
         return self.env["account.account"].browse(account_ids)
 
     @tools.ormcache("templates")
@@ -778,13 +778,6 @@ class WizardUpdateChartsAccounts(models.TransientModel):
             ]
         )
 
-    def _domain_taxes_to_deactivate(self, found_taxes_ids):
-        return [
-            ("company_id", "=", self.company_id.id),
-            ("id", "not in", found_taxes_ids),
-            ("active", "=", True),
-        ]
-
     def _find_taxes(self):
         """Search for, and load, tax templates to create/update/delete."""
         found_taxes_ids = []
@@ -828,7 +821,11 @@ class WizardUpdateChartsAccounts(models.TransientModel):
         # search for taxes not in the template and propose them for
         # deactivation
         taxes_to_deactivate = self.env["account.tax"].search(
-            self._domain_taxes_to_deactivate(found_taxes_ids)
+            [
+                ("company_id", "=", self.company_id.id),
+                ("id", "not in", found_taxes_ids),
+                ("active", "=", True),
+            ]
         )
         for tax in taxes_to_deactivate:
             self.tax_ids.create(
@@ -1074,10 +1071,9 @@ class WizardUpdateChartsAccounts(models.TransientModel):
                 tax.write(vals)
                 done |= tax
 
-        for rep_line, v in todo_dict["account_dict"][
-            "account.tax.repartition.line"
-        ].items():
+        for k, v in todo_dict["account_dict"]["account.tax.repartition.line"].items():
             if v["account_id"]:
+                rep_line = self.env["account.tax.repartition.line"].browse(k)
                 acc_id = self.find_account_by_templates(
                     self.env["account.account.template"].browse(v["account_id"].id)
                 )
