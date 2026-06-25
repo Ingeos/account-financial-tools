@@ -9,11 +9,6 @@ class AccountMove(models.Model):
     _inherit = "account.move"
 
     name = fields.Char(compute="_compute_name_by_sequence")
-    # highest_name, sequence_prefix and sequence_number are not needed any more
-    # -> compute=False to improve perf
-    highest_name = fields.Char(compute=False)
-    sequence_prefix = fields.Char(compute=False)
-    sequence_number = fields.Integer(compute=False)
 
     _sql_constraints = [
         (
@@ -46,9 +41,23 @@ class AccountMove(models.Model):
                     seq = move.journal_id.refund_sequence_id
                 else:
                     seq = move.journal_id.sequence_id
-                name = seq.next_by_id(sequence_date=move.date)
+                # next_by_id(date) only applies on ir.sequence.date_range selection
+                # => we use with_context(ir_sequence_date=date).next_by_id()
+                # which applies on ir.sequence.date_range selection AND prefix
+                name = seq.with_context(ir_sequence_date=move.date).next_by_id()
             move.name = name
 
     # We must by-pass this constraint of sequence.mixin
     def _constrains_date_sequence(self):
         return True
+
+    def _post(self, soft=True):
+        self.flush()
+        return super()._post(soft=soft)
+
+    def _compute_name(self):
+        """Overwrite account module method in order to
+        avoid side effect if legacy code call it directly
+        like when creating entry from email.
+        """
+        return self._compute_name_by_sequence()
